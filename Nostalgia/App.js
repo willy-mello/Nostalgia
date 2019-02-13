@@ -1,12 +1,40 @@
 import React from 'react';
 import { Platform, StatusBar, StyleSheet, View } from 'react-native';
-import { AppLoading, Asset, Font, Icon } from 'expo';
+import { AppLoading, Asset, Font, Icon, Expo } from 'expo';
 import AppNavigator from './navigation/AppNavigator';
+import { ANDROID_ID } from './secrets'
 
 export default class App extends React.Component {
-  state = {
-    isLoadingComplete: false,
-  };
+  constructor(props) {
+    super(props)
+    this.state = {
+      isLoadingComplete: false,
+      signedIn: false,
+      name: '',
+      photoURL: ''
+    };
+
+    signIn = async () => {
+      try {
+        const result = await Expo.Google.logInAsync({
+          androidClientId: ANDROID_ID,
+          //iosClientId: IOS_ID <-- if I want to use this later
+          scopes: ['profile', 'email', 'location']
+        })
+        if (result.type === 'success') {
+          this.setState({
+            signIn: true,
+            name: result.user.name,
+            photoURL: result.user.photoURL
+          })
+        }
+        else { console.log('cancelled') }
+      } catch (error) {
+        console.error(error)
+      }
+    }
+
+  }
 
   render() {
     if (!this.state.isLoadingComplete && !this.props.skipLoadingScreen) {
